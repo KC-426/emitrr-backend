@@ -1,4 +1,5 @@
 const deck_schema = require("../modal/deck");
+const User = require('../modal/user')
 
 const cardTypes = ["cat", "defuse", "shuffle", "exploding_kitten"];
 
