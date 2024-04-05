@@ -35,35 +35,61 @@ const startGame = async (req, res) => {
 };
 
 const drawCardFromDeck = async (req, res) => {
-  if (deck.length === 0) {
-    res.status(400).json({ error: "No cards left in the deck" });
-    return;
+  try {
+    if (deck.length === 0) {
+      throw new Error("No cards left in the deck");
+    }
+
+    const drawnCard = deck.shift();
+
+    switch (drawnCard) {
+      case "cat":
+        return res
+          .status(200)
+          .json({ message: "Cat card drawn successfully", card: drawnCard });
+      case "defuse":
+        return res
+          .status(200)
+          .json({ message: "Defuse card drawn successfully", card: drawnCard });
+      case "exploding_kitten":
+        return res
+          .status(200)
+          .json({ message: "Boom! You lost the game!", card: drawnCard });
+      case "shuffle":
+        initializeDeck();
+        return res
+          .status(200)
+          .json({
+            message: "Shuffle card drawn successfully",
+            card: drawnCard,
+          });
+      default:
+        return res
+          .status(200)
+          .json({ message: "Card drawn successfully", card: drawnCard });
+    }
+  } catch (error) {
+    console.error("Error drawing card:", error);
+    return res
+      .status(500)
+      .json({ error: error.message || "Internal Server Error" });
   }
 
-  const drawnCard = deck.shift();
+  
+};
 
-  switch (drawnCard) {
-    case "cat":
-      break;
-    case "defuse":
-      break;
-    case "exploding_kitten":
-      res.status(200).json({ message: "Boom! You lost the game!" });
-      return;
-    case "shuffle":
-      deck = initializeDeck();
-      break;
+const getLeaderboard = async (req, res) => {
+  try {
+    const leaderboard = await User.find().sort({ wins: -1 }).limit(10);
+    res.status(200).json(leaderboard);
+  } catch (error) {
+    console.error("Error fetching leaderboard:", error);
+    res.status(500).json({ error: "Internal Server Error" });
   }
-
-  if (deck.length === 0) {
-    res.status(200).json({ message: "Congratulations! You won the game!" });
-    return;
-  }
-
-  res.status(200).json({ message: "Card drawn successfully", card: drawnCard });
 };
 
 module.exports = {
   startGame,
-  drawCardFromDeck
+  drawCardFromDeck,
+  getLeaderboard,
 };
